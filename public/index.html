@@ -142,6 +142,15 @@
   }
   @media (max-width: 480px) { .hero-art { display: none; } .hero-stats { gap: 18px; } }
 
+  .consent { display: flex; gap: 10px; align-items: flex-start; font-weight: 400; font-size: 13.5px; color: var(--muted); background: #faf9f6; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .consent input { margin-top: 3px; width: 16px; height: 16px; flex: none; accent-color: var(--accent); }
+  .consent a { color: var(--accent); }
+  .foot { max-width: 1180px; margin: 30px auto 0; padding: 22px 20px 34px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 10px 24px; justify-content: space-between; color: var(--muted); font-size: 14px; }
+  .foot b { color: var(--ink); }
+  .foot nav a { color: var(--muted); text-decoration: none; margin-left: 18px; }
+  .foot nav a:first-child { margin-left: 0; }
+  .foot nav a:hover { color: var(--accent); }
+
   .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px); opacity: 0; background: var(--ink); color: #fff; padding: 12px 18px; border-radius: 12px; transition: .25s; z-index: 100; pointer-events: none; max-width: 90vw; }
   .toast.show { opacity: 1; transform: translateX(-50%); }
 
@@ -258,6 +267,10 @@
           <input class="field" name="contact" maxlength="100" required>
         </label>
       </div>
+      <label class="consent">
+        <input type="checkbox" name="accepte" value="1">
+        <span>J'accepte les <a href="/legal.html#cgu" target="_blank">conditions d'utilisation</a> et que mon prénom et mon contact soient <b>affichés publiquement</b> sur l'annonce (<a href="/legal.html#confidentialite" target="_blank">confidentialité</a>). L'annonce est supprimée automatiquement après 12 mois.</span>
+      </label>
       <p class="err" id="sellErr"></p>
       <div class="actions">
         <button type="button" class="btn ghost" data-close>Annuler</button>
@@ -266,6 +279,11 @@
     </form>
   </div>
 </dialog>
+
+<footer class="foot">
+  <div><b>♻ Seconde Main</b> — achat et vente d'occasion entre particuliers, sans commission.</div>
+  <nav><a href="/legal.html#mentions">Mentions légales</a><a href="/legal.html#confidentialite">Confidentialité</a><a href="/legal.html#cgu">Conditions d'utilisation</a></nav>
+</footer>
 
 <div class="toast" id="toast"></div>
 
@@ -443,6 +461,7 @@ $("#sellForm").onsubmit = async e => {
   if (!d.titre.trim()) return err.textContent = "Indiquez un titre.";
   if (d.prix === "" || +d.prix < 0) return err.textContent = "Indiquez un prix (0 pour donner).";
   if (!d.vendeur.trim() || !d.contact.trim()) return err.textContent = "Indiquez votre prénom et un moyen de contact.";
+  if (!d.accepte) return err.textContent = "Cochez la case pour accepter les conditions d'utilisation.";
   err.textContent = "";
   const btn = $("#btnPublish"); btn.disabled = true; btn.textContent = "Publication…";
   try {

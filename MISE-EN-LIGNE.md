@@ -38,6 +38,11 @@ Sans volume, **les annonces et les photos sont effacées** à chaque mise à jou
    - Nom : `ADMIN_PASSWORD`
    - Valeur : un mot de passe long et unique (au moins 16 caractères), que vous gardez pour vous.
 
+5. Ajoutez une troisième variable pour la page légale (mentions légales / RGPD) :
+   - Nom : `CONTACT_EMAIL`
+   - Valeur : l'adresse e-mail où l'on peut vous joindre (signalements, demandes RGPD).
+     Conseil : créez une adresse dédiée au site, elle sera visible publiquement.
+
 Railway redéploie le site automatiquement.
 
 La page d'administration sera à l'adresse `https://VOTRE-SITE/admin.html`.

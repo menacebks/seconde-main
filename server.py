@@ -26,6 +26,8 @@ MAX_PHOTO_BYTES = 3 * 1024 * 1024  # 3 Mo par photo (après décodage)
 MAX_BODY = 25 * 1024 * 1024
 CATEGORIES = ["Maison", "Électronique", "Vêtements", "Loisirs", "Véhicules", "Enfants", "Autre"]
 ETATS = ["Neuf", "Très bon état", "Bon état", "Satisfaisant"]
+CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "").strip()  # affiché sur la page légale
+DUREE_MAX_MS = 365 * 24 * 3600 * 1000  # RGPD : annonces supprimées automatiquement après 12 mois
 
 os.makedirs(UPLOADS, exist_ok=True)
 os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
@@ -62,6 +64,35 @@ def save(annonces):
     with open(tmp, "w", encoding="utf-8") as f:
         json.dump(annonces, f, ensure_ascii=False, indent=1)
     os.replace(tmp, DATA_FILE)
+
+
+def supprimer_photos(a):
+    for url in a.get("photos", []):
+        try:
+            os.remove(os.path.join(UPLOADS, os.path.basename(url)))
+        except OSError:
+            pass
+
+
+def purger_anciennes():
+    """Supprime les annonces de plus de 12 mois et leurs photos."""
+    limite = time.time() * 1000 - DUREE_MAX_MS
+    with lock:
+        annonces = load()
+        vieilles = [a for a in annonces if a["date"] < limite]
+        if vieilles:
+            save([a for a in annonces if a["date"] >= limite])
+    for a in vieilles:
+        supprimer_photos(a)
+    return len(vieilles)
+
+
+def purge_periodique():
+    while True:
+        n = purger_anciennes()
+        if n:
+            print(f"Purge : {n} annonce(s) de plus de 12 mois supprimée(s).", flush=True)
+        time.sleep(6 * 3600)
 
 
 def public_view(a):
@@ -127,7 +158,7 @@ class Handler(SimpleHTTPRequestHandler):
             annonces.sort(key=lambda a: a["date"], reverse=True)
             return self.send_json(200, [public_view(a) for a in annonces])
         if path == "/api/meta":
-            return self.send_json(200, {"categories": CATEGORIES, "etats": ETATS, "maxPhotos": MAX_PHOTOS})
+            return self.send_json(200, {"categories": CATEGORIES, "etats": ETATS, "maxPhotos": MAX_PHOTOS, "contactEmail": CONTACT_EMAIL})
         if path.startswith("/uploads/"):
             name = os.path.basename(path)
             file = os.path.join(UPLOADS, name)
@@ -168,6 +199,8 @@ class Handler(SimpleHTTPRequestHandler):
             photos = d.get("photos") or []
             if not titre or not vendeur or not contact:
                 raise ValueError("Titre, nom et contact sont obligatoires.")
+            if d.get("accepte") not in (True, "1", 1, "on"):
+                raise ValueError("Vous devez accepter les conditions d'utilisation.")
             if prix < 0 or prix > 1_000_000:
                 raise ValueError("Prix invalide.")
             if not photos:
@@ -229,11 +262,7 @@ class Handler(SimpleHTTPRequestHandler):
                 return self.send_json(403, {"erreur": "Code de suppression incorrect."})
             annonces.remove(a)
             save(annonces)
-        for url in a["photos"]:
-            try:
-                os.remove(os.path.join(UPLOADS, os.path.basename(url)))
-            except OSError:
-                pass
+        supprimer_photos(a)
         return self.send_json(200, {"ok": True})
 
     def log_message(self, fmt, *args):
@@ -246,4 +275,5 @@ if __name__ == "__main__":
         print(f"Administration : http://localhost:{PORT}/admin.html  (mot de passe : variable ADMIN_PASSWORD)", flush=True)
     else:
         print(f"Administration : http://localhost:{PORT}/admin.html  (mot de passe dans {ADMIN_PASSWORD_FILE})", flush=True)
+    threading.Thread(target=purge_periodique, daemon=True).start()
     ThreadingHTTPServer(("0.0.0.0", PORT), Handler).serve_forever()
