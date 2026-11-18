@@ -108,6 +108,7 @@ import os, sys
 chemin = os.path.expanduser("~/seconde-main")
 sys.path.insert(0, chemin)
 os.environ["CONTACT_EMAIL"] = "votre-adresse@exemple.fr"   # retirez le # en début de ligne sur PythonAnywhere
+os.environ["DON_URL"] = "https://revolut.me/enigmahrdc"   # lien de dons Revolut (bouton « Soutenir le site »)
 from app import application
 ```
 

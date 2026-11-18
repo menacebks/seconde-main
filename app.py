@@ -26,7 +26,7 @@ MAX_BODY = 25 * 1024 * 1024
 CATEGORIES = ["Maison", "Électronique", "Vêtements", "Loisirs", "Véhicules", "Enfants", "Autre"]
 ETATS = ["Neuf", "Très bon état", "Bon état", "Satisfaisant"]
 CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "").strip()  # affiché sur la page légale
-# Lien de dons (Ko-fi, Buy Me a Coffee, PayPal.me...) : le bouton « Soutenir » n'apparaît que s'il est défini
+# Lien de dons (Revolut : https://revolut.me/VOTRE-PSEUDO) : le bouton « Soutenir » n'apparaît que s'il est défini
 DON_URL = os.environ.get("DON_URL", "").strip()
 if not DON_URL.startswith("https://"):
     DON_URL = ""
