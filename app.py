@@ -26,6 +26,10 @@ MAX_BODY = 25 * 1024 * 1024
 CATEGORIES = ["Maison", "Électronique", "Vêtements", "Loisirs", "Véhicules", "Enfants", "Autre"]
 ETATS = ["Neuf", "Très bon état", "Bon état", "Satisfaisant"]
 CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "").strip()  # affiché sur la page légale
+# Lien de dons (Ko-fi, Buy Me a Coffee, PayPal.me...) : le bouton « Soutenir » n'apparaît que s'il est défini
+DON_URL = os.environ.get("DON_URL", "").strip()
+if not DON_URL.startswith("https://"):
+    DON_URL = ""
 DUREE_MAX_MS = 365 * 24 * 3600 * 1000  # RGPD : annonces supprimées automatiquement après 12 mois
 PURGE_INTERVALLE_S = 6 * 3600
 
@@ -279,7 +283,8 @@ def application(environ, start_response):
             return json_rep(start_response, 200, [public_view(a) for a in annonces])
         if path == "/api/meta":
             return json_rep(start_response, 200, {"categories": CATEGORIES, "etats": ETATS,
-                                                  "maxPhotos": MAX_PHOTOS, "contactEmail": CONTACT_EMAIL})
+                                                  "maxPhotos": MAX_PHOTOS, "contactEmail": CONTACT_EMAIL,
+                                                  "donUrl": DON_URL})
         if path.startswith("/uploads/"):
             return photo(path, start_response)
         return fichier_statique(path, start_response)
