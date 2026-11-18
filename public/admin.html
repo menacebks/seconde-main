@@ -163,12 +163,12 @@ let annonces = [], categories = [], selected = new Set(), openId = null;
 
 // ---------- Connexion ----------
 async function login(p) {
-  const r = await fetch("/api/admin/login", { method: "POST", headers: { "X-Admin-Password": p } });
+  const r = await fetch("/api/admin/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: p }) });
   if (!r.ok) throw new Error((await r.json()).erreur || "Erreur");
 }
 $("#loginForm").onsubmit = async e => {
   e.preventDefault();
-  const p = $("#pwd").value, btn = $("#btnLogin");
+  const p = $("#pwd").value.trim(), btn = $("#btnLogin");
   if (!p) return;
   btn.disabled = true; $("#loginErr").textContent = "";
   try { await login(p); pwd = p; sessionStorage.setItem("adminPwd", p); start(); }
@@ -235,7 +235,7 @@ function render() {
 async function remove(ids) {
   let ok = 0;
   for (const id of ids) {
-    const r = await fetch(`/api/admin/annonces/${id}`, { method: "DELETE", headers: { "X-Admin-Password": pwd } });
+    const r = await fetch(`/api/admin/annonces/${id}`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: pwd }) });
     if (r.status === 401) { sessionStorage.removeItem("adminPwd"); alert("Session expirée, reconnectez-vous."); return location.reload(); }
     if (r.ok || r.status === 404) { ok++; annonces = annonces.filter(a => a.id !== id); selected.delete(id); }
   }

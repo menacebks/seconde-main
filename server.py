@@ -90,8 +90,9 @@ class Handler(SimpleHTTPRequestHandler):
         fwd = self.headers.get("X-Forwarded-For", "")
         return fwd.split(",")[0].strip() or self.client_address[0]
 
-    def check_admin(self):
-        """Renvoie None si le mot de passe admin est bon, sinon envoie l'erreur et renvoie False."""
+    def check_admin(self, password):
+        """Renvoie None si le mot de passe admin est bon, sinon envoie l'erreur et renvoie False.
+        Le mot de passe arrive dans le corps JSON (UTF-8) pour accepter les accents."""
         ip, now = self.client_ip(), time.time()
         with lock:
             n, t0 = echecs.get(ip, (0, now))
@@ -100,7 +101,7 @@ class Handler(SimpleHTTPRequestHandler):
             if n >= MAX_ECHECS:
                 self.send_json(429, {"erreur": "Trop d'essais. Réessayez dans quelques minutes."})
                 return False
-        given = self.headers.get("X-Admin-Password", "").encode("utf-8")
+        given = str(password or "").strip().encode("utf-8")
         if secrets.compare_digest(given, ADMIN_PASSWORD.encode("utf-8")):
             with lock:
                 echecs.pop(ip, None)
@@ -145,7 +146,11 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         if urlparse(self.path).path == "/api/admin/login":
-            if self.check_admin() is None:
+            try:
+                pw = self.read_json().get("password", "")
+            except (ValueError, json.JSONDecodeError, AttributeError):
+                pw = ""
+            if self.check_admin(pw) is None:
                 self.send_json(200, {"ok": True})
             return
         if urlparse(self.path).path != "/api/annonces":
@@ -206,12 +211,15 @@ class Handler(SimpleHTTPRequestHandler):
         if not m:
             return self.send_error(404)
         admin = bool(m.group(1))
-        if admin and self.check_admin() is False:
-            return
         try:
-            code = str(self.read_json().get("code", ""))
+            body = self.read_json()
         except (ValueError, json.JSONDecodeError):
-            code = ""
+            body = {}
+        if not isinstance(body, dict):
+            body = {}
+        code = str(body.get("code", ""))
+        if admin and self.check_admin(body.get("password", "")) is False:
+            return
         with lock:
             annonces = load()
             a = next((x for x in annonces if x["id"] == m.group(2)), None)
