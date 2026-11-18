@@ -84,7 +84,7 @@ Railway republie le site en une minute environ.
 
 # Option gratuite : PythonAnywhere
 
-Site en ligne : **https://enigmahackbks.eu.pythonanywhere.com** (compte EU, serveurs en Allemagne).
+Site en ligne : **https://lesbonnesaffairesbelgique.eu.pythonanywhere.com** (compte EU, serveurs en Allemagne).
 Limite du compte gratuit : se connecter au moins **une fois par mois** sur eu.pythonanywhere.com et cliquer sur
 **« Run until 1 month from today »** dans l'onglet **Web**, sinon le site est mis en pause
 (PythonAnywhere envoie un e-mail de rappel une semaine avant).
@@ -98,7 +98,7 @@ git clone https://github.com/menacebks/seconde-main.git
 
 ## 2. Créer le site
 Onglet **Web** → **Add a new web app** → **Manual configuration** → **Python 3.13**.
-(Déjà fait pour enigmahackbks.)
+(Déjà fait pour lesbonnesaffairesbelgique.)
 
 ## 3. Brancher le code
 Dans l'onglet **Web**, cliquez sur le lien du **WSGI configuration file** et remplacez tout son contenu par :
