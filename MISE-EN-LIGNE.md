@@ -1,4 +1,4 @@
-# Mettre Seconde Main en ligne
+# Mettre Les Bonnes Affaires Belgique en ligne
 
 Deux hébergements possibles :
 - **PythonAnywhere** (gratuit) : voir la section tout en bas.

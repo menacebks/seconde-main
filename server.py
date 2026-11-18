@@ -1,5 +1,5 @@
 """
-Seconde Main - lancement local (et sur Railway).
+Les Bonnes Affaires Belgique - lancement local (et sur Railway).
     python server.py   puis ouvrir http://localhost:8000
 Sur PythonAnywhere, ce fichier n'est pas utilisé : c'est app.py (variable `application`).
 """
@@ -22,7 +22,7 @@ class Handler(WSGIRequestHandler):
 
 
 if __name__ == "__main__":
-    print(f"Seconde Main en ligne : http://localhost:{PORT}  (données : {app.DATA_DIR})", flush=True)
+    print(f"Les Bonnes Affaires Belgique en ligne : http://localhost:{PORT}  (données : {app.DATA_DIR})", flush=True)
     if os.environ.get("ADMIN_PASSWORD"):
         print(f"Administration : http://localhost:{PORT}/admin.html  (mot de passe : variable ADMIN_PASSWORD)", flush=True)
     else:

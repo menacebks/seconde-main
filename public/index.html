@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Seconde Main — Achetez et vendez d'occasion</title>
+<title>Les Bonnes Affaires Belgique — Achetez et vendez d'occasion</title>
 <style>
   :root {
     --bg: #f6f4ef; --card: #fff; --ink: #1f2a2e; --muted: #6b7478;
@@ -20,6 +20,8 @@
   header { position: sticky; top: 0; z-index: 10; background: rgba(246,244,239,.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
   .bar { max-width: 1180px; margin: 0 auto; padding: 12px 20px; display: flex; gap: 16px; align-items: center; }
   .logo { font-weight: 800; font-size: 20px; letter-spacing: -.02em; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .flag-be { display: inline-block; width: 18px; height: 12px; border-radius: 2px; vertical-align: -1px; margin-right: 4px; background: linear-gradient(90deg, #1a1a1a 0 33.3%, #fdda24 33.3% 66.6%, #ef3340 66.6%); box-shadow: 0 0 0 1px rgba(255,255,255,.4); }
+  .logo .be { font-style: normal; font-weight: 700; font-size: 12px; background: #f4c95d; color: #1f2a2e; padding: 2px 8px; border-radius: 999px; letter-spacing: 0; }
   .logo span { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 9px; background: var(--accent); color: #fff; font-size: 17px; }
   .search { flex: 1; position: relative; }
   .search input { width: 100%; padding: 10px 14px 10px 38px; border: 1px solid var(--line); border-radius: 999px; background: #fff; outline: none; }
@@ -168,7 +170,7 @@
 
 <header>
   <div class="bar">
-    <div class="logo"><span>♻</span>Seconde Main</div>
+    <div class="logo"><span>♻</span>Les Bonnes Affaires <i class="be">Belgique</i></div>
     <div class="search">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       <input id="q" type="search" placeholder="Rechercher un objet, une ville…">
@@ -182,9 +184,9 @@
   <section class="hero" id="hero">
     <div class="hero-blob b1"></div><div class="hero-blob b2"></div>
     <div class="hero-text">
-      <span class="hero-badge">♻ Achat &amp; vente entre particuliers</span>
+      <span class="hero-badge"><i class="flag-be" aria-hidden="true"></i> Achat &amp; vente entre particuliers, partout en Belgique</span>
       <h1>Donnez une <em>seconde vie</em><br>à vos objets</h1>
-      <p>Vendez ce qui dort dans vos placards en quelques photos, et dénichez des trésors près de chez vous à petit prix.</p>
+      <p>Vendez ce qui dort dans vos placards en quelques photos, et dénichez des trésors près de chez vous, de Bruxelles à Liège, à petit prix.</p>
       <div class="hero-cta">
         <button class="btn hero-btn" id="heroSell">📸 Déposer une annonce</button>
         <button class="btn hero-ghost" id="heroBrowse">Parcourir les annonces</button>
@@ -253,7 +255,7 @@
           <select class="field" name="etat" id="selEtat"></select>
         </label>
         <label>Ville
-          <input class="field" name="ville" maxlength="60" placeholder="Ex. Lyon">
+          <input class="field" name="ville" maxlength="60" placeholder="Ex. Namur">
         </label>
       </div>
       <label>Description
@@ -281,7 +283,7 @@
 </dialog>
 
 <footer class="foot">
-  <div><b>♻ Seconde Main</b> — achat et vente d'occasion entre particuliers, sans commission.</div>
+  <div><b>♻ Les Bonnes Affaires Belgique</b> — achat et vente d'occasion entre particuliers, sans commission.</div>
   <nav><a href="/legal.html#mentions">Mentions légales</a><a href="/legal.html#confidentialite">Confidentialité</a><a href="/legal.html#cgu">Conditions d'utilisation</a></nav>
 </footer>
 

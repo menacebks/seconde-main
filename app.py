@@ -1,5 +1,5 @@
 """
-Seconde Main - application WSGI (bibliothèque standard Python uniquement).
+Les Bonnes Affaires Belgique - application WSGI (bibliothèque standard Python uniquement).
 
 - En local et sur Railway : lancée par server.py
 - Sur PythonAnywhere : importée par le fichier WSGI (variable `application`)
