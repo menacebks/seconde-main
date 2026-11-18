@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seconde Main — Achetez et vendez d'occasion</title>
+<style>
+  :root {
+    --bg: #f6f4ef; --card: #fff; --ink: #1f2a2e; --muted: #6b7478;
+    --line: #e4e0d7; --accent: #1f7a5c; --accent-ink: #fff; --accent-soft: #e3f1ec;
+    --danger: #b3412e; --radius: 14px; --shadow: 0 1px 2px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.06);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  img { display: block; max-width: 100%; }
+
+  /* En-tête */
+  header { position: sticky; top: 0; z-index: 10; background: rgba(246,244,239,.92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  .bar { max-width: 1180px; margin: 0 auto; padding: 12px 20px; display: flex; gap: 16px; align-items: center; }
+  .logo { font-weight: 800; font-size: 20px; letter-spacing: -.02em; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .logo span { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 9px; background: var(--accent); color: #fff; font-size: 17px; }
+  .search { flex: 1; position: relative; }
+  .search input { width: 100%; padding: 10px 14px 10px 38px; border: 1px solid var(--line); border-radius: 999px; background: #fff; outline: none; }
+  .search input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .search svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+  .btn { border: 0; border-radius: 999px; padding: 10px 18px; font-weight: 600; background: var(--accent); color: var(--accent-ink); white-space: nowrap; transition: filter .15s; }
+  .btn:hover { filter: brightness(1.08); }
+  .btn.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+  .btn.ghost:hover { background: #fff; }
+  .btn.danger { background: var(--danger); }
+  .btn:disabled { opacity: .6; cursor: wait; }
+
+  main { max-width: 1180px; margin: 0 auto; padding: 20px; }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 18px; }
+  .chip { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 6px 14px; font-size: 14px; }
+  .chip.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .filters .right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .filters select, .filters input { border: 1px solid var(--line); background: #fff; border-radius: 10px; padding: 6px 10px; font-size: 14px; }
+  .filters input { width: 110px; }
+  .count { color: var(--muted); font-size: 14px; margin: 0 0 12px; }
+
+  /* Grille d'annonces */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
+  .card { background: var(--card); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); cursor: pointer; transition: transform .15s, box-shadow .15s; text-align: left; border: 0; padding: 0; }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgba(0,0,0,.06), 0 10px 28px rgba(0,0,0,.1); }
+  .card .ph { aspect-ratio: 4/3; background: #ece8df; position: relative; }
+  .card .ph img { width: 100%; height: 100%; object-fit: cover; }
+  .card .nb { position: absolute; right: 8px; bottom: 8px; background: rgba(0,0,0,.6); color: #fff; font-size: 12px; padding: 2px 8px; border-radius: 999px; }
+  .card .mine { position: absolute; left: 8px; top: 8px; background: var(--accent); color: #fff; font-size: 12px; padding: 2px 8px; border-radius: 999px; }
+  .card .body { padding: 12px 14px 14px; }
+  .price { font-weight: 800; font-size: 18px; }
+  .card .t { margin: 2px 0 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .meta { color: var(--muted); font-size: 13px; display: flex; justify-content: space-between; gap: 8px; }
+  .empty { text-align: center; padding: 70px 20px; color: var(--muted); }
+  .empty b { display: block; font-size: 20px; color: var(--ink); margin-bottom: 6px; }
+
+  /* Fenêtres */
+  dialog { border: 0; padding: 0; border-radius: 18px; width: min(920px, calc(100vw - 24px)); max-height: calc(100vh - 24px); box-shadow: 0 20px 60px rgba(0,0,0,.25); }
+  dialog::backdrop { background: rgba(20,25,28,.55); }
+  .dlg-head { display: flex; justify-content: space-between; align-items: center; padding: 16px 22px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: #fff; z-index: 1; }
+  .dlg-head h2 { margin: 0; font-size: 19px; }
+  .x { border: 0; background: #f0ede6; width: 34px; height: 34px; border-radius: 50%; font-size: 18px; line-height: 1; }
+  .dlg-body { padding: 22px; }
+
+  /* Détail */
+  .detail { display: grid; grid-template-columns: 1.3fr 1fr; gap: 24px; }
+  .viewer { background: #111; border-radius: 12px; aspect-ratio: 4/3; position: relative; overflow: hidden; }
+  .viewer img { width: 100%; height: 100%; object-fit: contain; }
+  .nav { position: absolute; top: 50%; transform: translateY(-50%); border: 0; background: rgba(255,255,255,.85); width: 38px; height: 38px; border-radius: 50%; font-size: 20px; }
+  .nav.prev { left: 10px; } .nav.next { right: 10px; }
+  .thumbs { display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; }
+  .thumbs button { border: 2px solid transparent; padding: 0; border-radius: 8px; overflow: hidden; width: 64px; height: 64px; flex: none; background: none; }
+  .thumbs button.on { border-color: var(--accent); }
+  .thumbs img { width: 100%; height: 100%; object-fit: cover; }
+  .detail h3 { margin: 0 0 4px; font-size: 22px; line-height: 1.25; }
+  .detail .price { font-size: 26px; color: var(--accent); }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+  .tag { background: #f0ede6; border-radius: 999px; padding: 3px 10px; font-size: 13px; }
+  .desc { white-space: pre-wrap; margin: 14px 0; }
+  .seller { border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-top: 16px; }
+  .seller .who { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; font-weight: 700; }
+  .contact-box { display: none; margin-top: 10px; padding: 10px 12px; background: var(--accent-soft); border-radius: 10px; word-break: break-all; }
+  .owner { margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line); font-size: 14px; color: var(--muted); }
+
+  /* Formulaire */
+  form .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 14px; }
+  label small { font-weight: 400; color: var(--muted); }
+  .field { display: block; width: 100%; margin-top: 5px; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: #fff; font-weight: 400; outline: none; }
+  .field:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  textarea.field { min-height: 110px; resize: vertical; }
+  .drop { border: 2px dashed #cfc9bc; border-radius: 12px; padding: 22px; text-align: center; color: var(--muted); background: #faf9f6; cursor: pointer; transition: .15s; margin-top: 5px; font-weight: 400; }
+  .drop.over, .drop:hover { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+  .drop b { color: var(--ink); }
+  .previews { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; margin-top: 12px; }
+  .prev { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: #eee; }
+  .prev img { width: 100%; height: 100%; object-fit: cover; }
+  .prev .rm { position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border: 0; border-radius: 50%; background: rgba(0,0,0,.65); color: #fff; font-size: 14px; line-height: 1; }
+  .prev .cover { position: absolute; left: 4px; bottom: 4px; background: var(--accent); color: #fff; font-size: 11px; padding: 1px 6px; border-radius: 999px; }
+  .err { color: var(--danger); font-size: 14px; min-height: 20px; margin: 4px 0 10px; }
+  .actions { display: flex; justify-content: flex-end; gap: 10px; }
+
+  /* Bannière */
+  .hero { position: relative; overflow: hidden; border-radius: 24px; margin-bottom: 26px; padding: 48px 48px 44px;
+    background: linear-gradient(120deg, #15513f 0%, #1f7a5c 55%, #2f9a73 100%); color: #fff;
+    display: grid; grid-template-columns: 1.15fr 1fr; gap: 24px; align-items: center; box-shadow: 0 12px 40px rgba(21,81,63,.25); }
+  .hero::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+    background-image: radial-gradient(rgba(255,255,255,.09) 1.2px, transparent 1.2px); background-size: 18px 18px; }
+  .hero-blob { position: absolute; border-radius: 50%; filter: blur(10px); opacity: .55; }
+  .hero-blob.b1 { width: 340px; height: 340px; background: #f4c95d; right: -90px; top: -120px; opacity: .35; }
+  .hero-blob.b2 { width: 260px; height: 260px; background: #7fe0b5; left: 34%; bottom: -170px; opacity: .3; }
+  .hero-text { position: relative; z-index: 1; }
+  .hero-badge { display: inline-block; background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.25); padding: 5px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+  .hero h1 { font-size: clamp(30px, 4.2vw, 48px); line-height: 1.08; letter-spacing: -.03em; margin: 16px 0 14px; }
+  .hero h1 em { font-style: normal; color: #f4c95d; position: relative; white-space: nowrap; }
+  .hero h1 em::after { content: ""; position: absolute; left: 0; right: 0; bottom: 2px; height: 8px; background: rgba(244,201,93,.3); border-radius: 4px; z-index: -1; }
+  .hero p { font-size: 17px; opacity: .9; max-width: 470px; margin: 0 0 24px; }
+  .hero-cta { display: flex; flex-wrap: wrap; gap: 10px; }
+  .hero-btn { background: #f4c95d; color: #1f2a2e; padding: 13px 22px; font-size: 16px; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+  .hero-ghost { background: rgba(255,255,255,.12); color: #fff; border: 1px solid rgba(255,255,255,.35); padding: 13px 22px; font-size: 16px; }
+  .hero-stats { display: flex; gap: 28px; margin-top: 30px; }
+  .hero-stats b { display: block; font-size: 24px; letter-spacing: -.02em; }
+  .hero-stats span { font-size: 13px; opacity: .8; }
+  .hero-art { position: relative; width: 390px; height: 345px; justify-self: center; z-index: 1; }
+  .polaroid { position: absolute; width: 150px; background: #fff; color: var(--ink); padding: 8px 8px 10px; border-radius: 10px;
+    box-shadow: 0 14px 30px rgba(0,0,0,.25); font-size: 13px; font-weight: 700; text-align: center; animation: float 6s ease-in-out infinite; }
+  .polaroid .pic { height: 112px; border-radius: 6px; display: grid; place-items: center; font-size: 54px; margin-bottom: 8px; }
+  .p1 { left: 0; top: 14px; --r: -8deg; transform: rotate(var(--r)); }
+  .p2 { left: 215px; top: 0; --r: 6deg; transform: rotate(var(--r)); animation-delay: -1.5s; }
+  .p3 { left: 35px; top: 182px; --r: 4deg; transform: rotate(var(--r)); animation-delay: -3s; }
+  .p4 { left: 230px; top: 170px; --r: -5deg; transform: rotate(var(--r)); animation-delay: -4.5s; }
+  .tag-sold { position: absolute; left: 150px; top: 150px; background: #e2553f; color: #fff; font-weight: 800; padding: 6px 14px; border-radius: 8px;
+    transform: rotate(-12deg); box-shadow: 0 6px 16px rgba(0,0,0,.25); z-index: 2; font-size: 15px; letter-spacing: .02em; }
+  @keyframes float { 0%,100% { transform: rotate(var(--r)) translateY(0); } 50% { transform: rotate(var(--r)) translateY(-10px); } }
+  @media (prefers-reduced-motion: reduce) { .polaroid { animation: none; } }
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; padding: 32px 24px; }
+    .hero-art { transform: scale(.8); margin: -30px auto -40px; }
+  }
+  @media (max-width: 480px) { .hero-art { display: none; } .hero-stats { gap: 18px; } }
+
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px); opacity: 0; background: var(--ink); color: #fff; padding: 12px 18px; border-radius: 12px; transition: .25s; z-index: 100; pointer-events: none; max-width: 90vw; }
+  .toast.show { opacity: 1; transform: translateX(-50%); }
+
+  @media (max-width: 720px) {
+    .bar { flex-wrap: wrap; }
+    .search { order: 3; flex-basis: 100%; }
+    .logo { flex: 1; }
+    .detail, form .row { grid-template-columns: 1fr; }
+    .filters .right { margin-left: 0; }
+    .grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <div class="logo"><span>♻</span>Seconde Main</div>
+    <div class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Rechercher un objet, une ville…">
+    </div>
+    <button class="btn ghost" id="btnMine">Mes annonces</button>
+    <button class="btn" id="btnSell">+ Vendre un objet</button>
+  </div>
+</header>
+
+<main>
+  <section class="hero" id="hero">
+    <div class="hero-blob b1"></div><div class="hero-blob b2"></div>
+    <div class="hero-text">
+      <span class="hero-badge">♻ Achat &amp; vente entre particuliers</span>
+      <h1>Donnez une <em>seconde vie</em><br>à vos objets</h1>
+      <p>Vendez ce qui dort dans vos placards en quelques photos, et dénichez des trésors près de chez vous à petit prix.</p>
+      <div class="hero-cta">
+        <button class="btn hero-btn" id="heroSell">📸 Déposer une annonce</button>
+        <button class="btn hero-ghost" id="heroBrowse">Parcourir les annonces</button>
+      </div>
+      <div class="hero-stats">
+        <div><b id="statCount">0</b><span>annonces en ligne</span></div>
+        <div><b>0 €</b><span>de commission</span></div>
+        <div><b>2 min</b><span>pour publier</span></div>
+      </div>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <div class="polaroid p1"><div class="pic" style="background:linear-gradient(135deg,#ffd9a8,#ff9f6b)">🚲</div><span>Vélo · 120 €</span></div>
+      <div class="polaroid p2"><div class="pic" style="background:linear-gradient(135deg,#c9e8ff,#7fb8f0)">🎧</div><span>Casque · 35 €</span></div>
+      <div class="polaroid p3"><div class="pic" style="background:linear-gradient(135deg,#d8f3dc,#86cfa0)">🪴</div><span>Plante · 8 €</span></div>
+      <div class="polaroid p4"><div class="pic" style="background:linear-gradient(135deg,#f6d5f0,#d99ad0)">🧸</div><span>Peluche · Gratuit</span></div>
+      <div class="tag-sold">Vendu&nbsp;!</div>
+    </div>
+  </section>
+
+  <div class="filters" id="filters">
+    <div id="chips" style="display:contents"></div>
+    <div class="right">
+      <input id="maxPrice" type="number" min="0" placeholder="Prix max €">
+      <select id="sort">
+        <option value="recent">Plus récentes</option>
+        <option value="asc">Prix croissant</option>
+        <option value="desc">Prix décroissant</option>
+      </select>
+    </div>
+  </div>
+  <p class="count" id="count"></p>
+  <div class="grid" id="grid"></div>
+</main>
+
+<!-- Détail d'une annonce -->
+<dialog id="dlgDetail">
+  <div class="dlg-head"><h2>Annonce</h2><button class="x" data-close>×</button></div>
+  <div class="dlg-body" id="detailBody"></div>
+</dialog>
+
+<!-- Déposer une annonce -->
+<dialog id="dlgSell">
+  <div class="dlg-head"><h2>Vendre un objet</h2><button class="x" data-close>×</button></div>
+  <div class="dlg-body">
+    <form id="sellForm" novalidate>
+      <label>Photos <small>(jusqu'à 6 — la première sera la photo principale)</small>
+        <div class="drop" id="drop">
+          <b>Cliquez ou glissez vos photos ici</b><br>JPEG, PNG ou WebP
+          <input type="file" id="files" accept="image/*" multiple hidden>
+        </div>
+        <div class="previews" id="previews"></div>
+      </label>
+      <label>Titre de l'annonce
+        <input class="field" name="titre" maxlength="80" required placeholder="Ex. Vélo de ville Peugeot, taille M">
+      </label>
+      <div class="row">
+        <label>Prix (€)
+          <input class="field" name="prix" type="number" min="0" step="0.01" required placeholder="0 = à donner">
+        </label>
+        <label>Catégorie
+          <select class="field" name="categorie" id="selCat"></select>
+        </label>
+      </div>
+      <div class="row">
+        <label>État
+          <select class="field" name="etat" id="selEtat"></select>
+        </label>
+        <label>Ville
+          <input class="field" name="ville" maxlength="60" placeholder="Ex. Lyon">
+        </label>
+      </div>
+      <label>Description
+        <textarea class="field" name="description" maxlength="3000" placeholder="Dimensions, ancienneté, défauts éventuels, remise en main propre ou envoi…"></textarea>
+      </label>
+      <div class="row">
+        <label>Votre prénom
+          <input class="field" name="vendeur" maxlength="50" required>
+        </label>
+        <label>Contact <small>(e-mail ou téléphone)</small>
+          <input class="field" name="contact" maxlength="100" required>
+        </label>
+      </div>
+      <p class="err" id="sellErr"></p>
+      <div class="actions">
+        <button type="button" class="btn ghost" data-close>Annuler</button>
+        <button type="submit" class="btn" id="btnPublish">Publier l'annonce</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const euro = n => n === 0 ? "Gratuit" : n.toLocaleString("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: n % 1 ? 2 : 0 });
+const ago = t => {
+  const m = Math.round((Date.now() - t) / 60000);
+  if (m < 1) return "à l'instant";
+  if (m < 60) return `il y a ${m} min`;
+  const h = Math.round(m / 60); if (h < 24) return `il y a ${h} h`;
+  const d = Math.round(h / 24); if (d < 30) return `il y a ${d} j`;
+  return new Date(t).toLocaleDateString("fr-FR");
+};
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 3200); }
+
+// Codes de suppression des annonces créées depuis ce navigateur
+const myCodes = JSON.parse(localStorage.getItem("mesAnnonces") || "{}");
+const saveCodes = () => localStorage.setItem("mesAnnonces", JSON.stringify(myCodes));
+
+let annonces = [], meta = { categories: [], etats: [], maxPhotos: 6 };
+const state = { cat: "Toutes", q: "", max: "", sort: "recent", mine: false };
+
+async function init() {
+  [meta, annonces] = await Promise.all([fetch("/api/meta").then(r => r.json()), fetch("/api/annonces").then(r => r.json())]);
+  $("#selCat").innerHTML = meta.categories.map(c => `<option>${esc(c)}</option>`).join("");
+  $("#selEtat").innerHTML = meta.etats.map(c => `<option${c === "Bon état" ? " selected" : ""}>${esc(c)}</option>`).join("");
+  renderChips(); render();
+}
+
+function renderChips() {
+  $("#chips").innerHTML = ["Toutes", ...meta.categories].map(c =>
+    `<button class="chip${state.cat === c ? " on" : ""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");
+}
+
+function render() {
+  const q = state.q.toLowerCase().trim();
+  let list = annonces.filter(a =>
+    (state.cat === "Toutes" || a.categorie === state.cat) &&
+    (!state.mine || myCodes[a.id]) &&
+    (state.max === "" || a.prix <= +state.max) &&
+    (!q || [a.titre, a.description, a.ville, a.categorie].join(" ").toLowerCase().includes(q)));
+  if (state.sort === "asc") list.sort((a, b) => a.prix - b.prix);
+  else if (state.sort === "desc") list.sort((a, b) => b.prix - a.prix);
+  else list.sort((a, b) => b.date - a.date);
+
+  $("#statCount").textContent = annonces.length;
+  $("#hero").style.display = state.mine ? "none" : "";
+  $("#count").textContent = state.mine ? `Mes annonces · ${list.length}` : `${list.length} annonce${list.length > 1 ? "s" : ""}`;
+  $("#btnMine").classList.toggle("on", state.mine);
+  $("#btnMine").textContent = state.mine ? "Toutes les annonces" : "Mes annonces";
+
+  if (!list.length) {
+    $("#grid").innerHTML = `<div class="empty" style="grid-column:1/-1"><b>${annonces.length ? "Aucun résultat" : "Aucune annonce pour l'instant"}</b>${annonces.length ? "Essayez d'autres filtres." : "Soyez le premier à vendre un objet !"}</div>`;
+    return;
+  }
+  $("#grid").innerHTML = list.map(a => `
+    <button class="card" data-id="${a.id}">
+      <div class="ph">
+        <img src="${esc(a.photos[0])}" alt="" loading="lazy">
+        ${a.photos.length > 1 ? `<span class="nb">📷 ${a.photos.length}</span>` : ""}
+        ${myCodes[a.id] ? `<span class="mine">Mon annonce</span>` : ""}
+      </div>
+      <div class="body">
+        <div class="price">${euro(a.prix)}</div>
+        <div class="t">${esc(a.titre)}</div>
+        <div class="meta"><span>${esc(a.ville || a.categorie)}</span><span>${ago(a.date)}</span></div>
+      </div>
+    </button>`).join("");
+}
+
+// ---------- Détail ----------
+function openDetail(id) {
+  const a = annonces.find(x => x.id === id); if (!a) return;
+  let i = 0;
+  const contactHref = a.contact.includes("@") ? `mailto:${a.contact}?subject=${encodeURIComponent("Votre annonce : " + a.titre)}`
+    : `tel:${a.contact.replace(/[^\d+]/g, "")}`;
+  $("#detailBody").innerHTML = `
+    <div class="detail">
+      <div>
+        <div class="viewer">
+          <img id="big" src="${esc(a.photos[0])}" alt="${esc(a.titre)}">
+          ${a.photos.length > 1 ? `<button class="nav prev">‹</button><button class="nav next">›</button>` : ""}
+        </div>
+        ${a.photos.length > 1 ? `<div class="thumbs">${a.photos.map((p, k) => `<button data-k="${k}" class="${k ? "" : "on"}"><img src="${esc(p)}" alt=""></button>`).join("")}</div>` : ""}
+      </div>
+      <div>
+        <h3>${esc(a.titre)}</h3>
+        <div class="price">${euro(a.prix)}</div>
+        <div class="tags">
+          <span class="tag">${esc(a.categorie)}</span><span class="tag">${esc(a.etat)}</span>
+          ${a.ville ? `<span class="tag">📍 ${esc(a.ville)}</span>` : ""}<span class="tag">${ago(a.date)}</span>
+        </div>
+        ${a.description ? `<div class="desc">${esc(a.description)}</div>` : ""}
+        <div class="seller">
+          <div class="who"><div class="avatar">${esc(a.vendeur[0].toUpperCase())}</div><div><b>${esc(a.vendeur)}</b><br><small style="color:var(--muted)">Vendeur particulier</small></div></div>
+          <button class="btn" style="width:100%" id="btnContact">Contacter le vendeur</button>
+          <div class="contact-box" id="contactBox"><a href="${esc(contactHref)}">${esc(a.contact)}</a></div>
+        </div>
+        ${myCodes[a.id] ? `<div class="owner">C'est votre annonce.<br><button class="btn danger" style="margin-top:8px" id="btnDel">Supprimer l'annonce</button></div>` : ""}
+      </div>
+    </div>`;
+  const show = k => {
+    i = (k + a.photos.length) % a.photos.length;
+    $("#big").src = a.photos[i];
+    document.querySelectorAll(".thumbs button").forEach((b, n) => b.classList.toggle("on", n === i));
+  };
+  $("#detailBody").onclick = e => {
+    if (e.target.closest(".prev")) show(i - 1);
+    else if (e.target.closest(".next")) show(i + 1);
+    else if (e.target.closest(".thumbs button")) show(+e.target.closest("button").dataset.k);
+    else if (e.target.id === "btnContact") { $("#contactBox").style.display = "block"; e.target.remove(); }
+    else if (e.target.id === "btnDel") deleteAnnonce(a);
+  };
+  $("#dlgDetail").onkeydown = e => { if (e.key === "ArrowLeft") show(i - 1); if (e.key === "ArrowRight") show(i + 1); };
+  $("#dlgDetail").showModal();
+}
+
+async function deleteAnnonce(a) {
+  if (!confirm(`Supprimer définitivement « ${a.titre} » ?`)) return;
+  const r = await fetch(`/api/annonces/${a.id}`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: myCodes[a.id] }) });
+  const res = await r.json();
+  if (!r.ok) return toast(res.erreur || "Erreur");
+  delete myCodes[a.id]; saveCodes();
+  annonces = annonces.filter(x => x.id !== a.id);
+  $("#dlgDetail").close(); render(); toast("Annonce supprimée.");
+}
+
+// ---------- Photos : redimensionnement avant envoi ----------
+let photos = []; // data URLs
+function resize(file, max = 1400) {
+  return new Promise((ok, ko) => {
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      const s = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url); ok(c.toDataURL("image/jpeg", 0.82));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); ko(new Error("Image illisible")); };
+    img.src = url;
+  });
+}
+async function addFiles(files) {
+  const imgs = [...files].filter(f => f.type.startsWith("image/"));
+  const room = meta.maxPhotos - photos.length;
+  if (imgs.length > room) toast(`${meta.maxPhotos} photos maximum.`);
+  for (const f of imgs.slice(0, room)) {
+    try { photos.push(await resize(f)); } catch { toast(`« ${f.name} » n'a pas pu être lue.`); }
+    renderPreviews();
+  }
+}
+function renderPreviews() {
+  $("#previews").innerHTML = photos.map((p, k) => `
+    <div class="prev"><img src="${p}" alt="">
+      <button type="button" class="rm" data-k="${k}" title="Retirer">×</button>
+      ${k === 0 ? `<span class="cover">Principale</span>` : ""}</div>`).join("");
+}
+const drop = $("#drop");
+drop.onclick = () => $("#files").click();
+$("#files").onchange = e => { addFiles(e.target.files); e.target.value = ""; };
+drop.ondragover = e => { e.preventDefault(); drop.classList.add("over"); };
+drop.ondragleave = () => drop.classList.remove("over");
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove("over"); addFiles(e.dataTransfer.files); };
+$("#previews").onclick = e => { const b = e.target.closest(".rm"); if (b) { e.preventDefault(); photos.splice(+b.dataset.k, 1); renderPreviews(); } };
+
+// ---------- Publication ----------
+$("#sellForm").onsubmit = async e => {
+  e.preventDefault();
+  const f = e.target, d = Object.fromEntries(new FormData(f));
+  const err = $("#sellErr");
+  if (!photos.length) return err.textContent = "Ajoutez au moins une photo.";
+  if (!d.titre.trim()) return err.textContent = "Indiquez un titre.";
+  if (d.prix === "" || +d.prix < 0) return err.textContent = "Indiquez un prix (0 pour donner).";
+  if (!d.vendeur.trim() || !d.contact.trim()) return err.textContent = "Indiquez votre prénom et un moyen de contact.";
+  err.textContent = "";
+  const btn = $("#btnPublish"); btn.disabled = true; btn.textContent = "Publication…";
+  try {
+    const r = await fetch("/api/annonces", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...d, prix: +d.prix, photos }) });
+    const res = await r.json();
+    if (!r.ok) throw new Error(res.erreur || "Erreur lors de la publication.");
+    myCodes[res.id] = res.code; saveCodes();
+    delete res.code; annonces.unshift(res);
+    f.reset(); photos = []; renderPreviews();
+    $("#dlgSell").close();
+    state.cat = "Toutes"; state.mine = false; renderChips(); render();
+    toast("Votre annonce est en ligne !");
+  } catch (ex) { err.textContent = ex.message; }
+  finally { btn.disabled = false; btn.textContent = "Publier l'annonce"; }
+};
+
+// ---------- Événements ----------
+$("#btnSell").onclick = $("#heroSell").onclick = () => $("#dlgSell").showModal();
+$("#heroBrowse").onclick = () => $("#filters").scrollIntoView({ behavior: "smooth", block: "start" });
+$("#btnMine").onclick = () => { state.mine = !state.mine; render(); };
+$("#grid").onclick = e => { const c = e.target.closest(".card"); if (c) openDetail(c.dataset.id); };
+$("#chips").onclick = e => { const c = e.target.closest(".chip"); if (c) { state.cat = c.dataset.cat; renderChips(); render(); } };
+$("#q").oninput = e => { state.q = e.target.value; render(); };
+$("#maxPrice").oninput = e => { state.max = e.target.value; render(); };
+$("#sort").onchange = e => { state.sort = e.target.value; render(); };
+document.querySelectorAll("dialog").forEach(dl => dl.addEventListener("click", e => {
+  if (e.target === dl || e.target.closest("[data-close]")) dl.close();
+}));
+
+init().catch(() => { $("#grid").innerHTML = `<div class="empty" style="grid-column:1/-1"><b>Serveur injoignable</b>Lancez « python server.py » puis rechargez la page.</div>`; });
+</script>
+</body>
+</html>

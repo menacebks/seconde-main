@@ -1,0 +1,5 @@
+data/
+uploads/
+.claude/
+__pycache__/
+*.tmp

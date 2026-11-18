@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Administration — Seconde Main</title>
+<style>
+  :root { --bg: #f6f4ef; --ink: #1f2a2e; --muted: #6b7478; --line: #e4e0d7; --accent: #1f7a5c; --accent-soft: #e3f1ec; --danger: #b3412e; --gold: #f4c95d; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--ink); }
+  button, input, select { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  .btn { border: 0; border-radius: 999px; padding: 9px 16px; font-weight: 600; background: var(--accent); color: #fff; white-space: nowrap; }
+  .btn:hover { filter: brightness(1.08); }
+  .btn.ghost { background: #fff; color: var(--ink); border: 1px solid var(--line); }
+  .btn.danger { background: var(--danger); }
+  .btn.sm { padding: 5px 12px; font-size: 13px; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* Connexion */
+  #login { min-height: 100vh; display: grid; place-items: center; padding: 20px;
+    background: linear-gradient(120deg, #15513f, #1f7a5c 55%, #2f9a73); }
+  .login-card { background: #fff; border-radius: 20px; padding: 34px; width: min(380px, 100%); box-shadow: 0 20px 60px rgba(0,0,0,.25); }
+  .login-card h1 { margin: 12px 0 4px; font-size: 22px; }
+  .login-card p { margin: 0 0 20px; color: var(--muted); }
+  .logo { display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: var(--accent); color: #fff; font-size: 22px; }
+  .field { display: block; width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; outline: none; background: #fff; }
+  .field:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .err { color: var(--danger); font-size: 14px; min-height: 21px; margin: 8px 0; }
+  .login-card .btn { width: 100%; padding: 12px; }
+  .back { display: block; text-align: center; margin-top: 14px; color: var(--muted); font-size: 14px; }
+
+  /* Tableau de bord */
+  #app { display: none; }
+  header { background: var(--ink); color: #fff; }
+  .bar { max-width: 1240px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+  .bar .title { font-weight: 800; font-size: 18px; display: flex; align-items: center; gap: 10px; flex: 1; }
+  .bar .title .logo { width: 32px; height: 32px; font-size: 16px; border-radius: 9px; }
+  .bar .title small { font-weight: 600; background: var(--gold); color: var(--ink); padding: 1px 8px; border-radius: 999px; font-size: 12px; }
+  .bar a, .bar button.link { color: #cfd6d8; text-decoration: none; background: none; border: 0; font-size: 14px; }
+  .bar a:hover, .bar button.link:hover { color: #fff; }
+  main { max-width: 1240px; margin: 0 auto; padding: 22px 20px 60px; }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 18px; }
+  .stat { background: #fff; border-radius: 14px; padding: 16px 18px; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+  .stat span { color: var(--muted); font-size: 13px; }
+  .stat b { display: block; font-size: 26px; letter-spacing: -.02em; margin-top: 2px; }
+
+  .panel { background: #fff; border-radius: 14px; box-shadow: 0 1px 2px rgba(0,0,0,.05); margin-bottom: 18px; }
+  .panel h2 { font-size: 15px; margin: 0; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+  .cats { padding: 14px 18px; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px 28px; }
+  .cat-row { display: grid; grid-template-columns: 100px 1fr 28px; align-items: center; gap: 10px; font-size: 14px; }
+  .cat-bar { height: 8px; background: #f0ede6; border-radius: 4px; overflow: hidden; }
+  .cat-bar i { display: block; height: 100%; background: var(--accent); border-radius: 4px; }
+  .cat-row b { text-align: right; }
+
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+  .toolbar .field { width: auto; padding: 7px 12px; }
+  .toolbar input[type=search] { flex: 1; min-width: 200px; }
+  .toolbar .sel { margin-left: auto; color: var(--muted); font-size: 14px; display: flex; align-items: center; gap: 10px; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; font-size: 14px; }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 600; background: #faf9f6; }
+  tr:last-child td { border-bottom: 0; }
+  tbody tr:hover { background: #fbfaf7; }
+  tr.open { background: var(--accent-soft) !important; }
+  .thumb { width: 54px; height: 54px; border-radius: 8px; object-fit: cover; display: block; background: #eee; }
+  .t { font-weight: 600; max-width: 260px; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .price { font-weight: 700; white-space: nowrap; }
+  .pill { background: #f0ede6; border-radius: 999px; padding: 2px 9px; font-size: 12px; white-space: nowrap; }
+  .actions { white-space: nowrap; text-align: right; }
+  .detail td { background: #fbfaf7; padding: 16px 18px; }
+  .detail .photos { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .detail .photos img { width: 120px; height: 120px; object-fit: cover; border-radius: 8px; }
+  .detail .desc { white-space: pre-wrap; margin: 0; max-width: 760px; }
+  .empty { text-align: center; padding: 50px 20px; color: var(--muted); }
+  input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--accent); }
+
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px); opacity: 0; background: var(--ink); color: #fff; padding: 12px 18px; border-radius: 12px; transition: .25s; pointer-events: none; z-index: 10; }
+  .toast.show { opacity: 1; transform: translateX(-50%); }
+
+  @media (max-width: 860px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .hide-sm { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Connexion -->
+<section id="login">
+  <form class="login-card" id="loginForm">
+    <div class="logo">♻</div>
+    <h1>Administration</h1>
+    <p>Seconde Main — accès réservé</p>
+    <input class="field" type="password" id="pwd" placeholder="Mot de passe administrateur" autocomplete="current-password" autofocus>
+    <div class="err" id="loginErr"></div>
+    <button class="btn" type="submit" id="btnLogin">Se connecter</button>
+    <a class="back" href="/">← Retour au site</a>
+  </form>
+</section>
+
+<!-- Tableau de bord -->
+<div id="app">
+  <header>
+    <div class="bar">
+      <div class="title"><span class="logo">♻</span>Seconde Main <small>Admin</small></div>
+      <a href="/" target="_blank">Voir le site ↗</a>
+      <button class="link" id="btnLogout">Se déconnecter</button>
+    </div>
+  </header>
+  <main>
+    <div class="stats">
+      <div class="stat"><span>Annonces en ligne</span><b id="sTotal">0</b></div>
+      <div class="stat"><span>Publiées ces 7 derniers jours</span><b id="sWeek">0</b></div>
+      <div class="stat"><span>Valeur totale des objets</span><b id="sValue">0 €</b></div>
+      <div class="stat"><span>Vendeurs différents</span><b id="sSellers">0</b></div>
+    </div>
+
+    <div class="panel">
+      <h2>Annonces par catégorie</h2>
+      <div class="cats" id="cats"></div>
+    </div>
+
+    <div class="panel">
+      <div class="toolbar">
+        <input class="field" type="search" id="q" placeholder="Rechercher : titre, vendeur, contact, ville…">
+        <select class="field" id="fCat"><option value="">Toutes catégories</option></select>
+        <select class="field" id="sort">
+          <option value="recent">Plus récentes</option>
+          <option value="old">Plus anciennes</option>
+          <option value="desc">Prix décroissant</option>
+          <option value="asc">Prix croissant</option>
+        </select>
+        <div class="sel"><span id="selCount"></span><button class="btn danger sm" id="btnBulk" disabled>Supprimer la sélection</button></div>
+      </div>
+      <table>
+        <thead><tr>
+          <th style="width:34px"><input type="checkbox" id="all" title="Tout sélectionner"></th>
+          <th style="width:70px">Photo</th><th>Annonce</th><th>Prix</th>
+          <th class="hide-sm">Vendeur</th><th class="hide-sm">Publiée</th><th></th>
+        </tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const euro = n => n === 0 ? "Gratuit" : n.toLocaleString("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: n % 1 ? 2 : 0 });
+const date = t => new Date(t).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+function toast(m) { const t = $("#toast"); t.textContent = m; t.classList.add("show"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 3000); }
+
+let pwd = sessionStorage.getItem("adminPwd") || "";
+let annonces = [], categories = [], selected = new Set(), openId = null;
+
+// ---------- Connexion ----------
+async function login(p) {
+  const r = await fetch("/api/admin/login", { method: "POST", headers: { "X-Admin-Password": p } });
+  if (!r.ok) throw new Error((await r.json()).erreur || "Erreur");
+}
+$("#loginForm").onsubmit = async e => {
+  e.preventDefault();
+  const p = $("#pwd").value, btn = $("#btnLogin");
+  if (!p) return;
+  btn.disabled = true; $("#loginErr").textContent = "";
+  try { await login(p); pwd = p; sessionStorage.setItem("adminPwd", p); start(); }
+  catch (ex) { $("#loginErr").textContent = ex.message; }
+  finally { btn.disabled = false; }
+};
+$("#btnLogout").onclick = () => { sessionStorage.removeItem("adminPwd"); location.reload(); };
+
+async function start() {
+  $("#login").style.display = "none"; $("#app").style.display = "block";
+  const [meta, list] = await Promise.all([fetch("/api/meta").then(r => r.json()), fetch("/api/annonces").then(r => r.json())]);
+  categories = meta.categories; annonces = list;
+  $("#fCat").innerHTML += categories.map(c => `<option>${esc(c)}</option>`).join("");
+  render();
+}
+
+// ---------- Affichage ----------
+function render() {
+  // Statistiques
+  const week = Date.now() - 7 * 864e5;
+  $("#sTotal").textContent = annonces.length;
+  $("#sWeek").textContent = annonces.filter(a => a.date >= week).length;
+  $("#sValue").textContent = annonces.reduce((s, a) => s + a.prix, 0).toLocaleString("fr-FR", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+  $("#sSellers").textContent = new Set(annonces.map(a => a.contact.toLowerCase())).size;
+  const max = Math.max(1, ...categories.map(c => annonces.filter(a => a.categorie === c).length));
+  $("#cats").innerHTML = categories.map(c => {
+    const n = annonces.filter(a => a.categorie === c).length;
+    return `<div class="cat-row"><span>${esc(c)}</span><div class="cat-bar"><i style="width:${n / max * 100}%"></i></div><b>${n}</b></div>`;
+  }).join("");
+
+  // Liste filtrée
+  const q = $("#q").value.toLowerCase().trim(), cat = $("#fCat").value, sort = $("#sort").value;
+  const list = annonces.filter(a => (!cat || a.categorie === cat) &&
+    (!q || [a.titre, a.description, a.vendeur, a.contact, a.ville, a.id].join(" ").toLowerCase().includes(q)));
+  list.sort({ recent: (a, b) => b.date - a.date, old: (a, b) => a.date - b.date, desc: (a, b) => b.prix - a.prix, asc: (a, b) => a.prix - b.prix }[sort]);
+
+  for (const id of selected) if (!annonces.some(a => a.id === id)) selected.delete(id);
+  $("#selCount").textContent = selected.size ? `${selected.size} sélectionnée${selected.size > 1 ? "s" : ""}` : `${list.length} annonce${list.length > 1 ? "s" : ""}`;
+  $("#btnBulk").disabled = !selected.size;
+  $("#all").checked = list.length > 0 && list.every(a => selected.has(a.id));
+
+  if (!list.length) { $("#rows").innerHTML = `<tr><td colspan="7" class="empty">${annonces.length ? "Aucune annonce ne correspond." : "Aucune annonce pour l'instant."}</td></tr>`; return; }
+  $("#rows").innerHTML = list.map(a => `
+    <tr data-id="${a.id}" class="${openId === a.id ? "open" : ""}">
+      <td><input type="checkbox" class="pick" ${selected.has(a.id) ? "checked" : ""}></td>
+      <td><img class="thumb" src="${esc(a.photos[0])}" alt="" loading="lazy"></td>
+      <td><div class="t">${esc(a.titre)}</div><span class="pill">${esc(a.categorie)}</span> <span class="muted">${esc(a.etat)}${a.ville ? " · " + esc(a.ville) : ""} · ${a.photos.length} photo${a.photos.length > 1 ? "s" : ""}</span></td>
+      <td class="price">${euro(a.prix)}</td>
+      <td class="hide-sm">${esc(a.vendeur)}<div class="muted">${esc(a.contact)}</div></td>
+      <td class="hide-sm muted">${date(a.date)}</td>
+      <td class="actions">
+        <button class="btn ghost sm" data-act="view">${openId === a.id ? "Fermer" : "Détails"}</button>
+        <button class="btn danger sm" data-act="del">Supprimer</button>
+      </td>
+    </tr>
+    ${openId === a.id ? `<tr class="detail"><td colspan="7">
+      <div class="photos">${a.photos.map(p => `<a href="${esc(p)}" target="_blank"><img src="${esc(p)}" alt=""></a>`).join("")}</div>
+      <p class="desc">${a.description ? esc(a.description) : '<span class="muted">Pas de description.</span>'}</p>
+      <p class="muted" style="margin:10px 0 0">Identifiant : ${esc(a.id)}</p>
+    </td></tr>` : ""}`).join("");
+}
+
+// ---------- Suppression ----------
+async function remove(ids) {
+  let ok = 0;
+  for (const id of ids) {
+    const r = await fetch(`/api/admin/annonces/${id}`, { method: "DELETE", headers: { "X-Admin-Password": pwd } });
+    if (r.status === 401) { sessionStorage.removeItem("adminPwd"); alert("Session expirée, reconnectez-vous."); return location.reload(); }
+    if (r.ok || r.status === 404) { ok++; annonces = annonces.filter(a => a.id !== id); selected.delete(id); }
+  }
+  render(); toast(`${ok} annonce${ok > 1 ? "s" : ""} supprimée${ok > 1 ? "s" : ""}.`);
+}
+
+$("#rows").onclick = e => {
+  const tr = e.target.closest("tr[data-id]"); if (!tr) return;
+  const id = tr.dataset.id, a = annonces.find(x => x.id === id);
+  if (e.target.classList.contains("pick")) { e.target.checked ? selected.add(id) : selected.delete(id); return render(); }
+  const act = e.target.dataset.act;
+  if (act === "view") { openId = openId === id ? null : id; render(); }
+  if (act === "del" && confirm(`Supprimer définitivement « ${a.titre} » et ses photos ?`)) remove([id]);
+};
+$("#all").onchange = e => {
+  document.querySelectorAll("#rows tr[data-id]").forEach(tr => e.target.checked ? selected.add(tr.dataset.id) : selected.delete(tr.dataset.id));
+  render();
+};
+$("#btnBulk").onclick = () => {
+  if (confirm(`Supprimer définitivement ${selected.size} annonce(s) et leurs photos ?`)) remove([...selected]);
+};
+$("#q").oninput = $("#fCat").onchange = $("#sort").onchange = render;
+
+// Reconnexion automatique pendant la session du navigateur
+if (pwd) login(pwd).then(start).catch(() => { sessionStorage.removeItem("adminPwd"); pwd = ""; });
+</script>
+</body>
+</html>
