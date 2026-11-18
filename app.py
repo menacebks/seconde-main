@@ -271,7 +271,7 @@ def application(environ, start_response):
     method = environ.get("REQUEST_METHOD", "GET")
     path = environ.get("PATH_INFO", "/") or "/"
 
-    if method == "GET":
+    if method in ("GET", "HEAD"):
         if path == "/api/annonces":
             with lock:
                 annonces = load()

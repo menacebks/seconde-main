@@ -1,4 +1,10 @@
-# Mettre Seconde Main en ligne (Railway)
+# Mettre Seconde Main en ligne
+
+Deux hébergements possibles :
+- **PythonAnywhere** (gratuit) : voir la section tout en bas.
+- **Railway** (≈ 5 $/mois après l'essai) : sections 1 à 4.
+
+# Option payante : Railway
 
 Le projet est prêt : il ne reste que les étapes qui demandent **vos** comptes.
 Durée : environ 15 minutes. Coût : environ 5 $/mois chez Railway.
@@ -73,3 +79,48 @@ git push
 ```
 
 Railway republie le site en une minute environ.
+
+---
+
+# Option gratuite : PythonAnywhere
+
+Adresse obtenue : `https://VOTRE-PSEUDO.pythonanywhere.com` (HTTPS inclus).
+Limite du compte gratuit : se connecter au moins **une fois tous les 3 mois** et cliquer sur
+**« Run until 3 months from today »** dans l'onglet **Web**, sinon le site est mis en pause.
+
+## 1. Récupérer le code
+Onglet **Consoles** → **Bash**, puis :
+
+```bash
+git clone https://github.com/menacebks/seconde-main.git
+```
+
+## 2. Créer le site
+Onglet **Web** → **Add a new web app** → **Manual configuration** → **Python 3.13**.
+
+## 3. Brancher le code
+Dans l'onglet **Web**, cliquez sur le lien du **WSGI configuration file** et remplacez tout son contenu par :
+
+```python
+import os, sys
+chemin = os.path.expanduser("~/seconde-main")
+sys.path.insert(0, chemin)
+os.environ["CONTACT_EMAIL"] = "votre-adresse@exemple.fr"   # affichée sur la page légale
+from app import application
+```
+
+Cliquez sur **Save**, puis sur le bouton vert **Reload** de l'onglet **Web**.
+
+## 4. Mot de passe admin
+Au premier lancement, un mot de passe est créé dans le fichier
+`seconde-main/data/admin_password.txt` (onglet **Files**). Ouvrez-le pour le lire,
+ou remplacez son contenu par le mot de passe de votre choix, puis **Reload**.
+
+## Mettre à jour le site
+Après un `git push` depuis votre ordinateur, dans une console Bash PythonAnywhere :
+
+```bash
+cd ~/seconde-main && git pull
+```
+
+puis **Reload** dans l'onglet **Web**.
