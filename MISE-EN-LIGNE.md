@@ -1,4 +1,4 @@
-# Mettre Les Bonnes Affaires Belgique en ligne
+# Mettre Market Belgique en ligne
 
 Deux hébergements possibles :
 - **PythonAnywhere** (gratuit) : voir la section tout en bas.
