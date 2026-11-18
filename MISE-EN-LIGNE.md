@@ -84,9 +84,10 @@ Railway republie le site en une minute environ.
 
 # Option gratuite : PythonAnywhere
 
-Adresse obtenue : `https://VOTRE-PSEUDO.pythonanywhere.com` (HTTPS inclus).
-Limite du compte gratuit : se connecter au moins **une fois tous les 3 mois** et cliquer sur
-**« Run until 3 months from today »** dans l'onglet **Web**, sinon le site est mis en pause.
+Site en ligne : **https://enigmahackbks.eu.pythonanywhere.com** (compte EU, serveurs en Allemagne).
+Limite du compte gratuit : se connecter au moins **une fois par mois** sur eu.pythonanywhere.com et cliquer sur
+**« Run until 1 month from today »** dans l'onglet **Web**, sinon le site est mis en pause
+(PythonAnywhere envoie un e-mail de rappel une semaine avant).
 
 ## 1. Récupérer le code
 Onglet **Consoles** → **Bash**, puis :
@@ -97,6 +98,7 @@ git clone https://github.com/menacebks/seconde-main.git
 
 ## 2. Créer le site
 Onglet **Web** → **Add a new web app** → **Manual configuration** → **Python 3.13**.
+(Déjà fait pour enigmahackbks.)
 
 ## 3. Brancher le code
 Dans l'onglet **Web**, cliquez sur le lien du **WSGI configuration file** et remplacez tout son contenu par :
@@ -105,7 +107,7 @@ Dans l'onglet **Web**, cliquez sur le lien du **WSGI configuration file** et rem
 import os, sys
 chemin = os.path.expanduser("~/seconde-main")
 sys.path.insert(0, chemin)
-os.environ["CONTACT_EMAIL"] = "votre-adresse@exemple.fr"   # affichée sur la page légale
+os.environ["CONTACT_EMAIL"] = "votre-adresse@exemple.fr"   # retirez le # en début de ligne sur PythonAnywhere
 from app import application
 ```
 
